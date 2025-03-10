@@ -44,15 +44,31 @@ Information is wrapped inside, so first, enter the Robomaker container.
    find / -iname "*.png" 2>/dev/null | grep -i "China"
    ```
 
-Normally, textures are located at:
-```
-/opt/simapp/deepracer_simulation_environment/share/deepracer_simulation_environment/meshes/**your-world-name**/textures/
-```
-In my case, I'm using **China_track**, so my full path is:
-```
-/opt/simapp/deepracer_simulation_environment/share/deepracer_simulation_environment/meshes/China_track/textures/
-```
-![China_track textures](/PicturesForMyNote/ChinaTrackTextureList.png)
+### Finding Texture Files from the `.world` File
+To determine which textures are being used in the simulation, start by locating the `.world` file. These files define the world environment, including texture paths.
+
+1. Locate the `.world` file:
+   ```sh
+   find /opt/simapp/ -name "*.world"
+   ```
+2. Open the `.world` file corresponding to your track (e.g., `China_track.world`):
+   ```sh
+   cat /opt/simapp/deepracer_simulation_environment/share/deepracer_simulation_environment/worlds/China_track.world
+   ```
+3. Look for lines referencing mesh or texture files:
+   ```xml
+   <uri>model://China_track/meshes/China_track.obj</uri>
+   <texture>meshes/China_track/textures/China_track_road_T_01.png</texture>
+   ```
+4. From these references, you can determine where the texture files are stored. Normally, textures are located in:
+   ```
+   /opt/simapp/deepracer_simulation_environment/share/deepracer_simulation_environment/meshes/**your-world-name**/textures/
+   ```
+5. In my case, using **China_track**, the full texture path is:
+   ```
+   /opt/simapp/deepracer_simulation_environment/share/deepracer_simulation_environment/meshes/China_track/textures/
+   ```
+   ![China_track textures](/PicturesForMyNote/ChinaTrackTextureList.png)
 
 ### Replace Original Textures with Custom Ones
 Use the simplest painting tool available. The only requirement is that the custom image must have the same **size and name** as the original one!
@@ -75,41 +91,6 @@ services:
       - '/root/deepracer-for-cloud/textures/China_track_edge_white_T_01.png:/opt/simapp/deepracer_simulation_environment/share/deepracer_simulation_environment/meshes/China_track/textures/China_track_edge_white_T_01.png'
       - '/root/deepracer-for-cloud/textures/China_track_field_grass_T_01.png:/opt/simapp/deepracer_simulation_environment/share/deepracer_simulation_environment/meshes/China_track/textures/China_track_field_grass_T_01.png'
       - '/root/deepracer-for-cloud/textures/China_track_road_T_01.png:/opt/simapp/deepracer_simulation_environment/share/deepracer_simulation_environment/meshes/China_track/textures/China_track_road_T_01.png'
-      - '/root/deepracer-for-cloud/textures/China_track_sea_T_01.png:/opt/simapp/deepracer_simulation_environment/share/deepracer_simulation_environment/meshes/China_track/textures/China_track_sea_T_01.png'
-      - '/root/deepracer-for-cloud/textures/China_track_side_edge_T_01.png:/opt/simapp/deepracer_simulation_environment/share/deepracer_simulation_environment/meshes/China_track/textures/China_track_side_edge_T_01.png'
-```
-Save and exit:
-```sh
-Ctrl+S  # Save
-Ctrl+X  # Exit
-```
-
-### Mount `docker-compose-mytextures.yml`
-To understand how this project functions, locate the training script:
-
-Inside `bin/scripts_wrapper.sh`, find the function:
-```sh
-function dr-start-training {
-  dr-update-env
-  $DR_DIR/scripts/training/start.sh "$@"
-}
-```
-Since it references `scripts/training/start.sh`, locate this file.
-
-Modify it by adding:
-```sh
-COMPOSE_FILES="$COMPOSE_FILES $DR_DOCKER_FILE_SEP /root/deepracer-for-cloud/docker/docker-compose-mytextures.yml"
-```
-Your updated script should look like this:
-```sh
-if [ ${DR_ROBOMAKER_MOUNT_LOGS,,} = "true" ]; then
-  COMPOSE_FILES="$DR_TRAIN_COMPOSE_FILE $DR_DOCKER_FILE_SEP $DR_DIR/docker/docker-compose-mount.yml"
-  export DR_MOUNT_DIR="$DR_DIR/data/logs/robomaker/$DR_LOCAL_S3_MODEL_PREFIX"
-  mkdir -p $DR_MOUNT_DIR
-else
-  COMPOSE_FILES="$DR_TRAIN_COMPOSE_FILE"
-fi
-COMPOSE_FILES="$COMPOSE_FILES $DR_DOCKER_FILE_SEP /root/deepracer-for-cloud/docker/docker-compose-mytextures.yml"
 ```
 
 ## Update and Start Training
